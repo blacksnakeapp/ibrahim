@@ -1,0 +1,15 @@
+{
+  "name": "portofolio-ibrahim",
+  "version": "1.0.0",
+  "description": "Portofolio Sinematik Ibrahim - Video Editor & Creative Production",
+  "scripts": {
+    "dev": "npx http-server -p 8000 -o"
+  },
+  "keywords": [
+    "portfolio",
+    "video-editor",
+    "creative-production"
+  ],
+  "author": "Ibrahim",
+  "license": "ISC"
+}
