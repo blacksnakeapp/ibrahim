@@ -135,7 +135,7 @@ function renderBiodata() {
 
     if (heroBadge) heroBadge.textContent = bio.role;
     if (heroTitle) heroTitle.innerHTML = `Menghidupkan Cerita Melalui <br><span class="gradient-text">Video Audio Visual</span>`;
-    if (heroDesc) heroDesc.textContent = `Saya seorang ${bio.role} profesional yang fokus menyusun narasi visual yang memukau, efek grafis dinamis, dan kualitas audio sinematik.`;
+    if (heroDesc) heroDesc.textContent = `Saya seorang ${bio.role} profesional yang fokus menyusun visual yang memukau.`;
     if (heroAvatar && bio.avatar) {
         heroAvatar.src = bio.avatar;
     }
