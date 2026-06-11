@@ -27,7 +27,7 @@ const modalProjectBody = document.getElementById('modal-project-body');
 
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
-    
+
     if (savedTheme === 'dark') {
         body.classList.add('theme-dark');
         updateThemeIcon('dark');
@@ -126,15 +126,15 @@ window.addEventListener('scroll', () => {
 
 function renderBiodata() {
     const bio = window.portfolioData.biodata;
-    
+
     // Hero Elements
     const heroBadge = document.getElementById('hero-badge');
     const heroTitle = document.getElementById('hero-title');
     const heroDesc = document.getElementById('hero-desc');
     const heroAvatar = document.querySelector('.hero-avatar');
-    
+
     if (heroBadge) heroBadge.innerHTML = `<i class="fa-solid fa-video"></i> ${bio.role}`;
-    if (heroTitle) heroTitle.innerHTML = `Menghidupkan Cerita Melalui <br><span class="gradient-text">Visual & Sinematik</span>`;
+    if (heroTitle) heroTitle.innerHTML = `Menghidupkan Cerita Melalui <br><span class="gradient-text">Visual</span>`;
     if (heroDesc) heroDesc.textContent = `Saya seorang ${bio.role} profesional yang fokus menyusun narasi visual yang memukau, efek grafis dinamis, dan kualitas audio sinematik.`;
     if (heroAvatar && bio.avatar) {
         heroAvatar.src = bio.avatar;
@@ -147,7 +147,7 @@ function renderBiodata() {
     const bioRole = document.getElementById('bio-role');
     const bioLocation = document.getElementById('bio-location');
     const bioEducation = document.getElementById('bio-education');
-    
+
     if (aboutGreeting) aboutGreeting.innerHTML = `Halo, nama saya <span>${bio.name}</span>`;
     if (aboutText) aboutText.textContent = bio.about;
     if (bioName) bioName.textContent = bio.name;
@@ -159,7 +159,7 @@ function renderBiodata() {
     const statExp = document.getElementById('stat-exp');
     const statProj = document.getElementById('stat-proj');
     const statClients = document.getElementById('stat-clients');
-    
+
     if (statExp) statExp.textContent = bio.stats.experience;
     if (statProj) statProj.textContent = bio.stats.completedProjects;
     if (statClients) statClients.textContent = bio.stats.satisfiedClients;
@@ -170,7 +170,7 @@ function renderBiodata() {
     const contactWa = document.getElementById('contact-wa');
     const contactWaLink = document.getElementById('contact-wa-link');
     const contactLocation = document.getElementById('contact-location');
-    
+
     if (contactEmail) contactEmail.textContent = bio.email;
     if (contactEmailLink) contactEmailLink.href = `mailto:${bio.email}`;
     if (contactWa) contactWa.textContent = bio.whatsapp;
@@ -184,9 +184,9 @@ function renderBiodata() {
 function renderSkills() {
     const skillsGrid = document.getElementById('skills-grid');
     if (!skillsGrid) return;
-    
+
     skillsGrid.innerHTML = '';
-    
+
     // Group skills by category
     const categories = {};
     window.portfolioData.skills.forEach(skill => {
@@ -195,14 +195,14 @@ function renderSkills() {
         }
         categories[skill.category].push(skill);
     });
-    
+
     // Define category icons
     const categoryIcons = {
         "Produksi Video": "fa-film",
         "Desain & Grafis": "fa-palette",
         "Audio & Penyiaran": "fa-volume-high"
     };
-    
+
     for (const catName in categories) {
         const icon = categoryIcons[catName] || "fa-screwdriver-wrench";
         const skillListHTML = categories[catName].map(skill => `
@@ -216,7 +216,7 @@ function renderSkills() {
                 </div>
             </div>
         `).join('');
-        
+
         const cardHTML = `
             <div class="skill-category-card">
                 <div class="skill-category-header">
@@ -235,9 +235,9 @@ function renderSkills() {
 function renderProjects() {
     const portfolioGrid = document.getElementById('portfolio-grid');
     if (!portfolioGrid) return;
-    
+
     portfolioGrid.innerHTML = '';
-    
+
     window.portfolioData.projects.forEach(project => {
         let mediaHTML = '';
         if (project.isVideo) {
@@ -250,9 +250,9 @@ function renderProjects() {
         } else {
             mediaHTML = `<img src="${project.image}" alt="${project.title}" class="card-img">`;
         }
-        
+
         const techsHTML = project.techs.map(tech => `<span>${tech}</span>`).join('');
-        
+
         const linkBtnHTML = project.isVideo ? `
             <a href="${project.demoUrl || '#'}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa-brands fa-youtube"></i> YouTube</a>
             <a href="#" onclick="openProjectModal('${project.id}'); return false;" aria-label="Putar"><i class="fa-solid fa-circle-play"></i> Putar</a>
@@ -260,10 +260,10 @@ function renderProjects() {
             <a href="${project.codeUrl || '#'}" target="_blank" rel="noopener" aria-label="Source"><i class="fa-brands ${project.tag === 'UI/UX Design' ? 'fa-figma' : 'fa-github'}"></i> Link</a>
             <a href="#" onclick="openProjectModal('${project.id}'); return false;" aria-label="Demo"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo</a>
         `;
-        
+
         const detailBtnLabel = project.isVideo ? 'Putar Video' : 'Lihat Detail';
         const detailBtnIcon = project.isVideo ? 'fa-play' : 'fa-expand';
-        
+
         const cardHTML = `
             <div class="portfolio-card" data-category="${project.category}">
                 <div class="card-img-wrapper">
@@ -298,16 +298,16 @@ function initFilters() {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             const filterValue = btn.getAttribute('data-filter');
             const portfolioCards = document.querySelectorAll('.portfolio-card');
-            
+
             portfolioCards.forEach(card => {
                 const category = card.getAttribute('data-category');
-                
+
                 card.style.transform = 'scale(0.8)';
                 card.style.opacity = '0';
-                
+
                 setTimeout(() => {
                     if (filterValue === 'all' || category === filterValue) {
                         card.style.display = 'flex';
@@ -331,7 +331,7 @@ function initFilters() {
 function openProjectModal(projectId) {
     const data = window.portfolioData.projects.find(p => p.id === projectId);
     if (!data) return;
-    
+
     let mediaHTML = '';
     if (data.isVideo) {
         mediaHTML = `
@@ -342,9 +342,9 @@ function openProjectModal(projectId) {
     } else {
         mediaHTML = `<img src="${data.image}" alt="${data.title}" class="modal-detail-img">`;
     }
-    
+
     const techsHTML = data.techs.map(tech => `<span>${tech}</span>`).join('');
-    
+
     const content = `
         ${mediaHTML}
         <span class="modal-detail-tag">${data.tag}</span>
@@ -358,7 +358,7 @@ function openProjectModal(projectId) {
             <a href="${data.demoUrl || '#'}" class="btn btn-primary"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo Projek</a>
         </div>
     `;
-    
+
     modalProjectBody.innerHTML = content;
     projectModal.classList.add('active');
     projectModal.setAttribute('aria-hidden', 'false');
@@ -392,7 +392,7 @@ let skillObserver = null;
 function initSkillObserver() {
     const progressBars = document.querySelectorAll('.skill-progress');
     skillSection = document.getElementById('keahlian');
-    
+
     skillObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -419,7 +419,7 @@ if (contactForm) {
     msgTextarea.addEventListener('input', () => {
         const currentLength = msgTextarea.value.length;
         charCounter.textContent = `${currentLength} / 500`;
-        
+
         if (currentLength >= 500) {
             charCounter.style.color = '#ef4444';
         } else {
@@ -430,9 +430,9 @@ if (contactForm) {
     // Form Submission & Validation
     contactForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
         let isFormValid = true;
-        
+
         // Validate Name
         const nameInput = document.getElementById('name');
         if (nameInput.value.trim() === '') {
@@ -441,7 +441,7 @@ if (contactForm) {
         } else {
             clearError(nameInput);
         }
-        
+
         // Validate Email
         const emailInput = document.getElementById('email');
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -451,7 +451,7 @@ if (contactForm) {
         } else {
             clearError(emailInput);
         }
-        
+
         // Validate Subject
         const subjectInput = document.getElementById('subject');
         if (subjectInput.value.trim() === '') {
@@ -460,7 +460,7 @@ if (contactForm) {
         } else {
             clearError(subjectInput);
         }
-        
+
         // Validate Message
         if (msgTextarea.value.trim().length < 10) {
             showError(msgTextarea);
@@ -468,7 +468,7 @@ if (contactForm) {
         } else {
             clearError(msgTextarea);
         }
-        
+
         if (isFormValid) {
             showToast();
             contactForm.reset();
@@ -509,7 +509,7 @@ if (contactForm) {
                 }
             }
         });
-        
+
         input.addEventListener('input', () => {
             if (input.id === 'email') {
                 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -565,12 +565,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         window.portfolioData = defaultPortfolioData;
     }
-    
+
     // Render dynamic components
     renderBiodata();
     renderSkills();
     renderProjects();
-    
+
     // Initialize interaction systems
     initTheme();
     initFilters();
