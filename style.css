@@ -163,10 +163,34 @@ h1, h2, h3, h4 {
 
 .gradient-text {
     background: var(--gradient-text);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     display: inline-block;
+    animation: shimmer-gradient 6s ease-in-out infinite;
+    transition: filter 0.4s ease,
+                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                letter-spacing 0.4s ease;
+}
+
+.gradient-text:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.5)) drop-shadow(0 0 20px rgba(255, 42, 95, 0.4));
+    transform: scale(1.04) rotate(-0.5deg);
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+@keyframes shimmer-gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Section Common Styles */
@@ -598,13 +622,19 @@ section {
     border-radius: var(--radius-md);
     padding: 24px;
     box-shadow: var(--card-shadow);
-    transition: transform var(--transition-normal);
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                border-color 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    overflow: hidden;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .stat-card:hover {
-    transform: translateX(8px);
+    transform: scale(1.03) translate3d(0, 0, 0);
     border-color: var(--primary-color);
-    box-shadow: 0 0 20px var(--primary-glow);
+    box-shadow: 0 12px 30px var(--primary-glow);
 }
 
 .stat-icon {
@@ -676,11 +706,16 @@ section {
     box-shadow: var(--card-shadow);
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                border-color 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .portfolio-card:hover {
-    transform: translateY(-8px);
+    transform: scale(1.03) translate3d(0, 0, 0);
     box-shadow: 0 15px 35px var(--primary-glow);
     border-color: var(--primary-color);
 }
@@ -852,13 +887,19 @@ section {
     border-radius: var(--radius-lg);
     padding: 30px;
     box-shadow: var(--card-shadow);
-    transition: transform var(--transition-normal);
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                border-color 0.5s cubic-bezier(0.25, 1, 0.5, 1), 
+                box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    overflow: hidden;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .skill-category-card:hover {
-    transform: translateY(-5px);
+    transform: scale(1.03) translate3d(0, 0, 0);
     border-color: var(--primary-color);
-    box-shadow: 0 0 20px var(--primary-glow);
+    box-shadow: 0 12px 30px var(--primary-glow);
 }
 
 .skill-category-header {
@@ -1591,7 +1632,7 @@ a.contact-detail-card:hover {
     width: 0;
     height: 3px;
     background: var(--gradient-primary);
-    transition: width var(--transition-normal);
+    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .portfolio-card:hover::after, .skill-category-card:hover::after, .stat-card:hover::after {

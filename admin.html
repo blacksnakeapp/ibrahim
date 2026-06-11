@@ -532,6 +532,91 @@
                 width: 100%;
             }
         }
+        /* Upload Button & Preview */
+        .upload-field-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upload-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .upload-input-row input {
+            flex: 1;
+        }
+
+        .btn-upload {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #e89000, #f5c518);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(232, 144, 0, 0.4);
+        }
+
+        .btn-upload:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .upload-progress {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .upload-progress.active {
+            display: flex;
+        }
+
+        .progress-bar-wrap {
+            flex: 1;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e89000, #f5c518);
+            border-radius: 99px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .img-preview-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            display: none;
+        }
+
+        .img-preview-thumb.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -638,7 +723,20 @@
                     <div class="form-row">
                         <div class="form-group full-width">
                             <label for="input-bio-avatar">Tautan Foto Profil (URL Cloudinary/Lokal)</label>
-                            <input type="text" id="input-bio-avatar" placeholder="Masukkan URL gambar dari Cloudinary atau path lokal seperti assets/profile_avatar.png">
+                            <div class="upload-field-wrapper">
+                                <div class="upload-input-row">
+                                    <img class="img-preview-thumb" id="avatar-preview" src="" alt="Preview">
+                                    <input type="text" id="input-bio-avatar" placeholder="Paste URL atau klik Upload Cloudinary">
+                                    <label class="btn-upload" title="Upload ke Cloudinary">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                                        <input type="file" accept="image/*" style="display:none" onchange="uploadToCloudinary(this, 'input-bio-avatar', 'avatar-preview')">
+                                    </label>
+                                </div>
+                                <div class="upload-progress" id="progress-input-bio-avatar">
+                                    <span>Mengunggah...</span>
+                                    <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -730,13 +828,13 @@
 
     <!-- JavaScript Data and Controller Scripts -->
     <script src="data.js"></script>
-    <!-- Konfigurasi Firebase lokal (ada di .gitignore, tidak masuk repo) -->
-    <!-- Buat file env-config.js dari env.example dan isi dengan kredensial Anda -->
     <script src="env-config.js" onerror="console.warn('env-config.js tidak ditemukan — menjalankan Mode Lokal Fallback.')"></script>
     
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Baca konfigurasi Firebase dari env-config.js (window.__ENV__)
         // Jika file tidak ada atau belum diisi, gunakan fallback lokal otomatis
@@ -754,11 +852,13 @@
         const isFirebaseConfigured = !!firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("ISI_");
         
         let auth = null;
+        let db = null;
         
         if (isFirebaseConfigured) {
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
+                db = getFirestore(app);
             } catch (e) {
                 console.error("Gagal menginisialisasi Firebase:", e);
             }
@@ -876,7 +976,7 @@
 
         let activeData = null;
 
-        function loadData() {
+        async function loadData() {
             const savedData = localStorage.getItem('portfolioData');
             if (savedData) {
                 try {
@@ -891,6 +991,26 @@
             populateBiodataForm();
             renderSkillsForm();
             renderProjectsForm();
+
+            // Ambil data dari Firestore jika Firebase terkonfigurasi dan user sudah login
+            if (isFirebaseConfigured && db && auth && auth.currentUser) {
+                try {
+                    const docRef = doc(db, "portfolio", "data");
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        activeData = docSnap.data();
+                        localStorage.setItem('portfolioData', JSON.stringify(activeData));
+                        
+                        populateBiodataForm();
+                        renderSkillsForm();
+                        renderProjectsForm();
+                        showSuccessToast("Data berhasil disinkronkan dari Cloud Firestore!");
+                    }
+                } catch (error) {
+                    console.error("Gagal mengambil data dari Firestore:", error);
+                    showSuccessToast("Gagal memuat dari Cloud Firestore. Menggunakan data lokal.");
+                }
+            }
         }
 
         function populateBiodataForm() {
@@ -987,8 +1107,21 @@
                             <input type="text" value="${proj.tag}" class="proj-tag" data-index="${index}">
                         </div>
                         <div class="form-group">
-                            <label>Thumbnail Gambar (cth: assets/project_web.png)</label>
-                            <input type="text" value="${proj.image || ''}" class="proj-image" data-index="${index}">
+                            <label>Thumbnail Gambar</label>
+                            <div class="upload-field-wrapper">
+                                <div class="upload-input-row">
+                                    <img class="img-preview-thumb" id="proj-thumb-preview-${index}" src="${proj.image || ''}" alt="Preview" class="img-preview-thumb ${proj.image ? 'show' : ''}" style="${proj.image ? 'display:block' : 'display:none'}">
+                                    <input type="text" value="${proj.image || ''}" class="proj-image" data-index="${index}" placeholder="URL gambar atau klik Upload">
+                                    <label class="btn-upload" title="Upload ke Cloudinary">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                                        <input type="file" accept="image/*" style="display:none" onchange="uploadToCloudinaryInline(this, ${index})">
+                                    </label>
+                                </div>
+                                <div class="upload-progress" id="progress-proj-${index}">
+                                    <span>Mengunggah...</span>
+                                    <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Tautan Demo Langsung / Klien</label>
@@ -1007,6 +1140,10 @@
                                 <input type="checkbox" id="check-video-${index}" ${isVideoChecked} onchange="toggleVideoInput(this, ${index})">
                                 <label for="check-video-${index}">Ini adalah proyek Video Embed</label>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Kata Sandi Video (Opsional)</label>
+                            <input type="text" value="${proj.password || ''}" class="proj-password" data-index="${index}" placeholder="Kosongkan jika publik">
                         </div>
                         <div class="form-group full-width video-embed-group" id="video-group-${index}" style="${videoStyle}">
                             <label>URL Embed Video (cth: https://www.youtube.com/embed/dQw4w9WgXcQ)</label>
@@ -1040,7 +1177,8 @@
                 demoUrl: "",
                 codeUrl: "",
                 isVideo: true,
-                videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                videoEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                password: ""
             });
             renderProjectsForm();
         }
@@ -1054,7 +1192,7 @@
         // DATA SAVING AND EXPORTING
         // ==========================================================================
 
-        function saveAllData() {
+        async function saveAllData() {
             activeData.biodata.name = document.getElementById('input-bio-name').value;
             activeData.biodata.role = document.getElementById('input-bio-role').value;
             activeData.biodata.email = document.getElementById('input-bio-email').value;
@@ -1092,6 +1230,7 @@
             const projDescs = document.querySelectorAll('.proj-desc');
             const projTechs = document.querySelectorAll('.proj-techs');
             const projVideos = document.querySelectorAll('.proj-video-url');
+            const projPasswords = document.querySelectorAll('.proj-password');
             
             activeData.projects = [];
             projIds.forEach((input, index) => {
@@ -1104,6 +1243,7 @@
                 const description = projDescs[index].value;
                 const isVideo = document.getElementById(`check-video-${index}`).checked;
                 const videoEmbedUrl = projVideos[index].value;
+                const password = projPasswords[index] ? projPasswords[index].value : '';
                 
                 const techsRaw = projTechs[index].value;
                 const techs = techsRaw.split(',').map(t => t.trim()).filter(t => t !== '');
@@ -1120,13 +1260,27 @@
                         demoUrl,
                         codeUrl: category === 'design' ? 'https://figma.com' : 'https://youtube.com',
                         isVideo,
-                        videoEmbedUrl
+                        videoEmbedUrl,
+                        password
                     });
                 }
             });
 
             localStorage.setItem('portfolioData', JSON.stringify(activeData));
-            showSuccessToast();
+
+            if (isFirebaseConfigured && db && auth && auth.currentUser) {
+                showSuccessToast("Menyimpan ke Cloud Firestore...");
+                try {
+                    const docRef = doc(db, "portfolio", "data");
+                    await setDoc(docRef, activeData);
+                    showSuccessToast("Perubahan berhasil disimpan ke Cloud & Lokal!");
+                } catch (error) {
+                    console.error("Gagal menyimpan ke Firestore:", error);
+                    alert("Gagal menyimpan ke Cloud Firestore: " + error.message);
+                }
+            } else {
+                showSuccessToast("Perubahan disimpan secara lokal di browser.");
+            }
         }
 
         function resetToDefaults() {
@@ -1179,6 +1333,103 @@ const defaultPortfolioData = ${JSON.stringify(activeData, null, 4)};
         window.downloadConfigData = downloadConfigData;
         window.toggleVideoInput = toggleVideoInput;
         window.updateSkillPercent = updateSkillPercent;
+
+        // ==========================================================================
+        // CLOUDINARY UPLOAD
+        // ==========================================================================
+
+        const CLOUDINARY_CLOUD = (window.__ENV__ && window.__ENV__.CLOUDINARY_CLOUD_NAME) || '';
+        const CLOUDINARY_PRESET = (window.__ENV__ && window.__ENV__.CLOUDINARY_UPLOAD_PRESET) || 'Portofolio';
+
+        async function cloudinaryUpload(file, progressId) {
+            if (!CLOUDINARY_CLOUD) {
+                alert('Cloud Name Cloudinary belum diatur di env-config.js!');
+                return null;
+            }
+
+            const progressEl = document.getElementById(progressId);
+            const progressFill = progressEl ? progressEl.querySelector('.progress-bar-fill') : null;
+
+            if (progressEl) progressEl.classList.add('active');
+            if (progressFill) progressFill.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_PRESET);
+
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`);
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable && progressFill) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        progressFill.style.width = pct + '%';
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (progressEl) progressEl.classList.remove('active');
+                    if (xhr.status === 200) {
+                        const res = JSON.parse(xhr.responseText);
+                        resolve(res.secure_url);
+                    } else {
+                        alert('Upload gagal. Pastikan nama upload preset benar dan bersifat Unsigned.');
+                        resolve(null);
+                    }
+                };
+
+                xhr.onerror = () => {
+                    if (progressEl) progressEl.classList.remove('active');
+                    alert('Koneksi gagal saat upload ke Cloudinary.');
+                    resolve(null);
+                };
+
+                xhr.send(formData);
+            });
+        }
+
+        // Upload foto profil (avatar)
+        window.uploadToCloudinary = async function(fileInput, targetInputId, previewId) {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const url = await cloudinaryUpload(file, `progress-${targetInputId}`);
+            if (!url) return;
+
+            const input = document.getElementById(targetInputId);
+            if (input) input.value = url;
+
+            const preview = document.getElementById(previewId);
+            if (preview) {
+                preview.src = url;
+                preview.style.display = 'block';
+            }
+
+            showSuccessToast(`✅ Foto berhasil diupload ke Cloudinary!`);
+        };
+
+        // Upload thumbnail proyek
+        window.uploadToCloudinaryInline = async function(fileInput, index) {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const url = await cloudinaryUpload(file, `progress-proj-${index}`);
+            if (!url) return;
+
+            // Isi input URL proyek
+            const projInputs = document.querySelectorAll('.proj-image');
+            if (projInputs[index]) projInputs[index].value = url;
+
+            // Update preview thumbnail
+            const preview = document.getElementById(`proj-thumb-preview-${index}`);
+            if (preview) {
+                preview.src = url;
+                preview.style.display = 'block';
+            }
+
+            showSuccessToast(`✅ Thumbnail berhasil diupload ke Cloudinary!`);
+        };
     </script>
 </body>
 </html>

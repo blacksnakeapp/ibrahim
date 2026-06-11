@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Portofolio Sinematik Ibrahim - Video Editor & Creative Production",
   "scripts": {
-    "dev": "npx http-server -p 8000 -o"
+    "dev": "node generate-env.js && npx http-server -p 8000 -o -c-1",
+    "build": "node generate-env.js"
   },
   "keywords": [
     "portfolio",
