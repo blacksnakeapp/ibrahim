@@ -2,6 +2,7 @@
 const defaultPortfolioData = {
     biodata: {
         name: "Ibrahim",
+        avatar: "assets/profile_avatar.png",
         role: "Video Editor & Creative Production",
         email: "ibrahimlanceng@gmail.com",
         whatsapp: "+628123456789",
@@ -65,3 +66,5 @@ const defaultPortfolioData = {
         }
     ]
 };
+
+window.defaultPortfolioData = defaultPortfolioData;

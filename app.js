@@ -131,10 +131,14 @@ function renderBiodata() {
     const heroBadge = document.getElementById('hero-badge');
     const heroTitle = document.getElementById('hero-title');
     const heroDesc = document.getElementById('hero-desc');
+    const heroAvatar = document.querySelector('.hero-avatar');
     
     if (heroBadge) heroBadge.innerHTML = `<i class="fa-solid fa-video"></i> ${bio.role}`;
     if (heroTitle) heroTitle.innerHTML = `Menghidupkan Cerita Melalui <br><span class="gradient-text">Visual & Sinematik</span>`;
     if (heroDesc) heroDesc.textContent = `Saya seorang ${bio.role} profesional yang fokus menyusun narasi visual yang memukau, efek grafis dinamis, dan kualitas audio sinematik.`;
+    if (heroAvatar && bio.avatar) {
+        heroAvatar.src = bio.avatar;
+    }
 
     // About Elements
     const aboutGreeting = document.getElementById('about-greeting');

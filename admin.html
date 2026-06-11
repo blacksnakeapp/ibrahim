@@ -495,15 +495,15 @@
         /* Responsive */
         @media (max-width: 991px) {
             .dashboard-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 280px 1fr;
             }
             .sidebar {
-                flex-direction: row;
-                overflow-x: auto;
-                padding-bottom: 8px;
+                flex-direction: column;
+                overflow-x: visible;
+                padding-bottom: 0;
             }
             .tab-btn {
-                white-space: nowrap;
+                white-space: normal;
             }
         }
 
@@ -539,14 +539,28 @@
     <div class="login-overlay" id="login-overlay">
         <div class="login-box glass-card">
             <h1 class="login-logo">Porto<span>folio.</span></h1>
-            <h2 class="login-title">Dashboard Kredensial Admin</h2>
-            <div class="login-input-group">
-                <input type="password" id="passcode" class="login-input" placeholder="KATA SANDI" autofocus>
+            <h2 class="login-title">Masuk Sebagai Admin</h2>
+            
+            <div class="login-input-group" style="margin-bottom: 16px;">
+                <input type="email" id="admin-email" class="login-input" placeholder="ALAMAT EMAIL" style="letter-spacing: 0; text-align: left;" autofocus>
             </div>
-            <button class="btn btn-primary" onclick="attemptLogin()">
-                <span>Masuk Ke Panel</span> <i class="fa-solid fa-lock-open"></i>
-            </button>
-            <p class="login-error" id="login-error">Kata sandi tidak valid. Coba lagi.</p>
+            <div class="login-input-group" style="margin-bottom: 24px;">
+                <input type="password" id="admin-password" class="login-input" placeholder="KATA SANDI" style="letter-spacing: 1px; text-align: left;">
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-primary" id="login-btn">
+                    <span>Masuk Ke Panel</span> <i class="fa-solid fa-lock-open"></i>
+                </button>
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+                </a>
+            </div>
+            
+            <p class="login-error" id="login-error">Kredensial tidak valid. Silakan coba lagi.</p>
+            <p id="local-mode-warning" style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted); display: none;">
+                <i class="fa-solid fa-circle-info"></i> Mode Uji Coba Lokal Aktif.<br>Email: <strong>admin@email.com</strong> | Sandi: <strong>admin123</strong>
+            </p>
         </div>
     </div>
 
@@ -618,6 +632,13 @@
                         <div class="form-group">
                             <label for="input-bio-education">Pendidikan Terakhir</label>
                             <input type="text" id="input-bio-education">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="input-bio-avatar">Tautan Foto Profil (URL Cloudinary/Lokal)</label>
+                            <input type="text" id="input-bio-avatar" placeholder="Masukkan URL gambar dari Cloudinary atau path lokal seperti assets/profile_avatar.png">
                         </div>
                     </div>
 
@@ -709,51 +730,131 @@
 
     <!-- JavaScript Data and Controller Scripts -->
     <script src="data.js"></script>
-    <script>
-        // Authentication check
-        function checkAuth() {
-            const auth = sessionStorage.getItem('adminAuth');
-            const overlay = document.getElementById('login-overlay');
-            
-            if (auth === 'true') {
-                overlay.style.display = 'none';
-            } else {
-                overlay.style.display = 'flex';
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Konfigurasi Firebase Anda (Ganti dengan konfigurasi dari Firebase Console Anda nanti)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Check if config has been customized
+        const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
+        
+        let auth = null;
+        
+        if (isFirebaseConfigured) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+            } catch (e) {
+                console.error("Gagal menginisialisasi Firebase:", e);
             }
         }
 
-        function attemptLogin() {
-            const passcode = document.getElementById('passcode').value;
-            const errorMsg = document.getElementById('login-error');
-            
-            // simple default passcode
-            if (passcode === 'admin123') {
-                sessionStorage.setItem('adminAuth', 'true');
-                document.getElementById('login-overlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('login-overlay').style.display = 'none';
-                }, 300);
+        // DOM elements for Auth
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginBtn = document.getElementById('login-btn');
+        const emailInput = document.getElementById('admin-email');
+        const passwordInput = document.getElementById('admin-password');
+        const errorMsg = document.getElementById('login-error');
+        const localWarning = document.getElementById('local-mode-warning');
+
+        if (!isFirebaseConfigured) {
+            localWarning.style.display = 'block';
+        }
+
+        // Monitoring Auth State
+        if (isFirebaseConfigured && auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loginOverlay.style.display = 'none';
+                    loadData();
+                } else {
+                    loginOverlay.style.display = 'flex';
+                    loginOverlay.style.opacity = '1';
+                }
+            });
+        } else {
+            // Local fallback session check
+            const localAuth = sessionStorage.getItem('adminAuth');
+            if (localAuth === 'true') {
+                loginOverlay.style.display = 'none';
+                loadData();
             } else {
-                errorMsg.style.display = 'block';
-                document.getElementById('passcode').value = '';
-                document.getElementById('passcode').focus();
+                loginOverlay.style.display = 'flex';
+                loginOverlay.style.opacity = '1';
             }
         }
 
-        // Add Enter key listener for login
-        document.getElementById('passcode').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                attemptLogin();
+        // Handle Login Action
+        async function attemptLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            errorMsg.style.display = 'none';
+
+            if (isFirebaseConfigured && auth) {
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    console.error("Login Firebase gagal:", error);
+                    errorMsg.textContent = "Email atau kata sandi Firebase salah. Silakan coba lagi.";
+                    errorMsg.style.display = 'block';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            } else {
+                // Local fallback validation
+                if (email === 'admin@email.com' && password === 'admin123') {
+                    sessionStorage.setItem('adminAuth', 'true');
+                    loginOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loginOverlay.style.display = 'none';
+                    }, 300);
+                    loadData();
+                } else {
+                    errorMsg.textContent = "Email atau kata sandi salah (Mode Lokal). Gunakan admin@email.com / admin123.";
+                    errorMsg.style.display = 'block';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
             }
+        }
+
+        // Sign Out Action
+        window.logout = async function() {
+            if (isFirebaseConfigured && auth) {
+                try {
+                    await signOut(auth);
+                } catch (error) {
+                    console.error("Sign out gagal:", error);
+                }
+            } else {
+                sessionStorage.removeItem('adminAuth');
+                emailInput.value = '';
+                passwordInput.value = '';
+                errorMsg.style.display = 'none';
+                loginOverlay.style.display = 'flex';
+                loginOverlay.style.opacity = '1';
+            }
+        };
+
+        // Event listeners
+        loginBtn.addEventListener('click', attemptLogin);
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') attemptLogin();
         });
-
-        function logout() {
-            sessionStorage.removeItem('adminAuth');
-            document.getElementById('passcode').value = '';
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('login-overlay').style.opacity = '1';
-        }
+        emailInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') passwordInput.focus();
+        });
 
         // Tab Switcher
         function switchTab(tabId) {
@@ -795,6 +896,7 @@
             document.getElementById('input-bio-wa').value = bio.whatsapp;
             document.getElementById('input-bio-location').value = bio.location;
             document.getElementById('input-bio-education').value = bio.education;
+            document.getElementById('input-bio-avatar').value = bio.avatar || '';
             document.getElementById('input-bio-about').value = bio.about;
 
             document.getElementById('input-stat-exp').value = bio.stats.experience;
@@ -948,20 +1050,19 @@
         // ==========================================================================
 
         function saveAllData() {
-            // 1. Gather Biodata
             activeData.biodata.name = document.getElementById('input-bio-name').value;
             activeData.biodata.role = document.getElementById('input-bio-role').value;
             activeData.biodata.email = document.getElementById('input-bio-email').value;
             activeData.biodata.whatsapp = document.getElementById('input-bio-wa').value;
             activeData.biodata.location = document.getElementById('input-bio-location').value;
             activeData.biodata.education = document.getElementById('input-bio-education').value;
+            activeData.biodata.avatar = document.getElementById('input-bio-avatar').value;
             activeData.biodata.about = document.getElementById('input-bio-about').value;
 
             activeData.biodata.stats.experience = document.getElementById('input-stat-exp').value;
             activeData.biodata.stats.completedProjects = document.getElementById('input-stat-proj').value;
             activeData.biodata.stats.satisfiedClients = document.getElementById('input-stat-clients').value;
 
-            // 2. Gather Skills
             const skillCategories = document.querySelectorAll('.skill-category-select');
             const skillNames = document.querySelectorAll('.skill-name-input');
             const skillSliders = document.querySelectorAll('.skill-level-slider');
@@ -977,7 +1078,6 @@
                 }
             });
 
-            // 3. Gather Projects
             const projIds = document.querySelectorAll('.proj-id');
             const projTitles = document.querySelectorAll('.proj-title');
             const projCategories = document.querySelectorAll('.proj-category');
@@ -1000,7 +1100,6 @@
                 const isVideo = document.getElementById(`check-video-${index}`).checked;
                 const videoEmbedUrl = projVideos[index].value;
                 
-                // Parse techs array
                 const techsRaw = projTechs[index].value;
                 const techs = techsRaw.split(',').map(t => t.trim()).filter(t => t !== '');
                 
@@ -1021,10 +1120,7 @@
                 }
             });
 
-            // Save to Local Storage
             localStorage.setItem('portfolioData', JSON.stringify(activeData));
-            
-            // Show Success Notification
             showSuccessToast();
         }
 
@@ -1036,9 +1132,7 @@
             }
         }
 
-        // Generate data.js file for download
         function downloadConfigData() {
-            // First save any current changes
             saveAllData();
 
             const fileContent = `// Data Default Portofolio Ibrahim
@@ -1069,11 +1163,17 @@ const defaultPortfolioData = ${JSON.stringify(activeData, null, 4)};
             }, 3000);
         }
 
-        // Initialize Admin page
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            loadData();
-        });
+        // Attach functions to window scope for HTML inline calls
+        window.switchTab = switchTab;
+        window.addNewSkill = addNewSkill;
+        window.deleteSkill = deleteSkill;
+        window.addNewProject = addNewProject;
+        window.deleteProject = deleteProject;
+        window.saveAllData = saveAllData;
+        window.resetToDefaults = resetToDefaults;
+        window.downloadConfigData = downloadConfigData;
+        window.toggleVideoInput = toggleVideoInput;
+        window.updateSkillPercent = updateSkillPercent;
     </script>
 </body>
 </html>
