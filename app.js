@@ -771,19 +771,45 @@ document.addEventListener('DOMContentLoaded', () => {
     initFilters();
     initSkillObserver();
 
-    // Sinkronisasi data Firestore di latar belakang jika terkonfigurasi
+    // Sinkronisasi data Firestore di latar belakang jika terkonfigurasi secara hibrida
     const env = window.__ENV__ || {};
-    const firebaseConfig = {
-        apiKey: env.FIREBASE_API_KEY || "",
-        authDomain: env.FIREBASE_AUTH_DOMAIN || "",
-        projectId: env.FIREBASE_PROJECT_ID || "",
-        storageBucket: env.FIREBASE_STORAGE_BUCKET || "",
-        messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID || "",
-        appId: env.FIREBASE_APP_ID || ""
-    };
-    const isFirebaseConfigured = !!firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("ISI_");
-
-    if (isFirebaseConfigured) {
+    if (env.FIREBASE_API_KEY && !env.FIREBASE_API_KEY.startsWith("ISI_")) {
+        // 1. Gunakan konfigurasi lokal jika tersedia (window.__ENV__)
+        const firebaseConfig = {
+            apiKey: env.FIREBASE_API_KEY,
+            authDomain: env.FIREBASE_AUTH_DOMAIN,
+            projectId: env.FIREBASE_PROJECT_ID,
+            storageBucket: env.FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
+            appId: env.FIREBASE_APP_ID
+        };
         loadFirebaseData(firebaseConfig);
+    } else {
+        // 2. Ambil dari serverless API jika di Vercel (window.__ENV__ kosong)
+        fetch('/api/config')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error("Gagal memuat config dari API");
+            })
+            .then(apiEnv => {
+                const firebaseConfig = {
+                    apiKey: apiEnv.FIREBASE_API_KEY || "",
+                    authDomain: apiEnv.FIREBASE_AUTH_DOMAIN || "",
+                    projectId: apiEnv.FIREBASE_PROJECT_ID || "",
+                    storageBucket: apiEnv.FIREBASE_STORAGE_BUCKET || "",
+                    messagingSenderId: apiEnv.FIREBASE_MESSAGING_SENDER_ID || "",
+                    appId: apiEnv.FIREBASE_APP_ID || ""
+                };
+                const isFirebaseConfigured = !!firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("ISI_");
+
+                if (isFirebaseConfigured) {
+                    loadFirebaseData(firebaseConfig);
+                }
+            })
+            .catch(err => {
+                console.warn("Gagal menyinkronkan data dengan Firebase (Mode Uji Coba Lokal):", err);
+            });
     }
 });
