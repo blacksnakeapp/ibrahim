@@ -55,9 +55,9 @@
             <div class="hero-bg-glow"></div>
             <div class="container hero-container">
                 <div class="hero-content">
-                    <span class="hero-badge"><i class="fa-solid fa-video"></i> Video Editor & Creative Production</span>
-                    <h1 class="hero-title">Menghidupkan Cerita Melalui <br><span class="gradient-text">Visual & Sinematik</span></h1>
-                    <p class="hero-description">Saya seorang Video Editor & Creative Production profesional yang fokus menyusun narasi visual yang memukau, efek grafis dinamis, dan kualitas audio sinematik.</p>
+                    <span class="hero-badge" id="hero-badge"><i class="fa-solid fa-video"></i> Video Editor & Creative Production</span>
+                    <h1 class="hero-title" id="hero-title">Menghidupkan Cerita Melalui <br><span class="gradient-text">Visual & Sinematik</span></h1>
+                    <p class="hero-description" id="hero-desc">Saya seorang Video Editor & Creative Production profesional yang fokus menyusun narasi visual yang memukau, efek grafis dinamis, dan kualitas audio sinematik.</p>
                     <div class="hero-buttons">
                         <a href="#portofolio" class="btn btn-primary">Lihat Portofolio <i class="fa-solid fa-arrow-right"></i></a>
                         <a href="#kontak" class="btn btn-secondary">Hubungi Saya</a>
@@ -88,27 +88,27 @@
                 
                 <div class="about-grid">
                     <div class="about-info">
-                        <h3 class="about-greeting">Halo, nama saya <span>Ibrahim</span></h3>
-                        <p class="about-text">
+                        <h3 class="about-greeting" id="about-greeting">Halo, nama saya <span>Ibrahim</span></h3>
+                        <p class="about-text" id="about-text">
                             Saya adalah seorang Editor Video, Desainer Grafis, dan Produser Media Kreatif yang berdedikasi untuk menciptakan konten digital berkualitas tinggi. Berbekal keahlian di berbagai perangkat lunak produksi standar industri, saya siap merealisasikan visi kreatif Anda menjadi karya yang memukau.
                         </p>
                         
                         <div class="biodata-list">
                             <div class="biodata-item">
                                 <span class="bio-label"><i class="fa-solid fa-user"></i> Nama Lengkap</span>
-                                <span class="bio-value">Ibrahim</span>
+                                <span class="bio-value" id="bio-name">Ibrahim</span>
                             </div>
                             <div class="biodata-item">
                                 <span class="bio-label"><i class="fa-solid fa-briefcase"></i> Peran</span>
-                                <span class="bio-value">Video Editor & Creative Production</span>
+                                <span class="bio-value" id="bio-role">Video Editor & Creative Production</span>
                             </div>
                             <div class="biodata-item">
                                 <span class="bio-label"><i class="fa-solid fa-map-marker-alt"></i> Domisili</span>
-                                <span class="bio-value">Jakarta, Indonesia</span>
+                                <span class="bio-value" id="bio-location">Jakarta, Indonesia</span>
                             </div>
                             <div class="biodata-item">
                                 <span class="bio-label"><i class="fa-solid fa-graduation-cap"></i> Pendidikan</span>
-                                <span class="bio-value">S1 Teknik Informatika</span>
+                                <span class="bio-value" id="bio-education">S1 Teknik Informatika</span>
                             </div>
                         </div>
                     </div>
@@ -116,17 +116,17 @@
                     <div class="about-stats">
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fa-solid fa-award"></i></div>
-                            <h3 class="stat-number">3+</h3>
+                            <h3 class="stat-number" id="stat-exp">3+</h3>
                             <p class="stat-label">Tahun Pengalaman</p>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fa-solid fa-laptop-code"></i></div>
-                            <h3 class="stat-number">15+</h3>
+                            <h3 class="stat-number" id="stat-proj">15+</h3>
                             <p class="stat-label">Proyek Selesai</p>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><i class="fa-solid fa-heart"></i></div>
-                            <h3 class="stat-number">99%</h3>
+                            <h3 class="stat-number" id="stat-clients">99%</h3>
                             <p class="stat-label">Klien Puas</p>
                         </div>
                     </div>
@@ -153,81 +153,7 @@
                 
                 <!-- Portfolio Grid -->
                 <div class="portfolio-grid" id="portfolio-grid">
-                    <!-- Project 1: Web App -->
-                    <div class="portfolio-card" data-category="web">
-                        <div class="card-img-wrapper">
-                            <img src="assets/project_web.png" alt="Analytics Dashboard UI" class="card-img">
-                            <div class="card-overlay">
-                                <button class="btn btn-detail" onclick="openProjectModal('web-dashboard')">Lihat Detail <i class="fa-solid fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <span class="card-tag">Web App</span>
-                            <h3 class="card-title">Dasbor Analisis Finansial</h3>
-                            <p class="card-description">Aplikasi dashboard interaktif untuk memantau data transaksi keuangan secara real-time dengan grafik interaktif.</p>
-                            <div class="card-techs">
-                                <span>HTML</span>
-                                <span>CSS Variables</span>
-                                <span>JavaScript</span>
-                                <span>Chart.js</span>
-                            </div>
-                            <div class="card-links">
-                                <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i> Kode</a>
-                                <a href="#" onclick="openProjectModal('web-dashboard')" aria-label="Demo Langsung"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Project 2: UI/UX Design -->
-                    <div class="portfolio-card" data-category="design">
-                        <div class="card-img-wrapper">
-                            <img src="assets/project_design.png" alt="Creative Mobile App Mockup" class="card-img">
-                            <div class="card-overlay">
-                                <button class="btn btn-detail" onclick="openProjectModal('ui-travel')">Lihat Detail <i class="fa-solid fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <span class="card-tag">UI/UX Design</span>
-                            <h3 class="card-title">Aplikasi Mobile Traveling</h3>
-                            <p class="card-description">Desain antarmuka aplikasi travel modern dengan sistem navigasi yang simpel, elegan, dan ramah pengguna.</p>
-                            <div class="card-techs">
-                                <span>Figma</span>
-                                <span>User Research</span>
-                                <span>Glassmorphism</span>
-                            </div>
-                            <div class="card-links">
-                                <a href="https://figma.com" target="_blank" rel="noopener" aria-label="Figma Link"><i class="fa-brands fa-figma"></i> Desain</a>
-                                <a href="#" onclick="openProjectModal('ui-travel')" aria-label="Mockup"><i class="fa-solid fa-eye"></i> Mockup</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Project 3: Video Karya -->
-                    <div class="portfolio-card" data-category="video">
-                        <div class="card-img-wrapper">
-                            <div class="video-placeholder-gradient">
-                                <i class="fa-solid fa-circle-play video-play-icon"></i>
-                                <span class="video-duration">01:45</span>
-                            </div>
-                            <div class="card-overlay">
-                                <button class="btn btn-detail" onclick="openProjectModal('video-motion')">Putar Video <i class="fa-solid fa-play"></i></button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <span class="card-tag">Video Karya</span>
-                            <h3 class="card-title">Video Promosi Produk Digital</h3>
-                            <p class="card-description">Video motion graphics untuk mempromosikan produk SaaS, diedit secara profesional untuk kampanye media sosial.</p>
-                            <div class="card-techs">
-                                <span>Premiere Pro</span>
-                                <span>After Effects</span>
-                                <span>Motion Graphics</span>
-                            </div>
-                            <div class="card-links">
-                                <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube Link"><i class="fa-brands fa-youtube"></i> YouTube</a>
-                                <a href="#" onclick="openProjectModal('video-motion')" aria-label="Putar"><i class="fa-solid fa-circle-play"></i> Putar</a>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Di-render secara dinamis lewat JS -->
                 </div>
             </div>
         </section>
@@ -241,90 +167,8 @@
                     <div class="section-underline"></div>
                 </div>
                 
-                <div class="skills-grid">
-                    <!-- Video Production Skills -->
-                    <div class="skill-category-card">
-                        <div class="skill-category-header">
-                            <i class="fa-solid fa-film skill-cat-icon"></i>
-                            <h3>Produksi Video</h3>
-                        </div>
-                        <div class="skill-list">
-                            <div class="skill-item">
-                                <div class="skill-info">
-                                    <span>Adobe Premiere Pro</span>
-                                    <span>92%</span>
-                                </div>
-                                <div class="skill-progress-bar">
-                                    <div class="skill-progress" data-level="92%"></div>
-                                </div>
-                            </div>
-                            <div class="skill-item">
-                                <div class="skill-info">
-                                    <span>Adobe After Effects</span>
-                                    <span>85%</span>
-                                </div>
-                                <div class="skill-progress-bar">
-                                    <div class="skill-progress" data-level="85%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Design & Creative Skills -->
-                    <div class="skill-category-card">
-                        <div class="skill-category-header">
-                            <i class="fa-solid fa-palette skill-cat-icon"></i>
-                            <h3>Desain & Grafis</h3>
-                        </div>
-                        <div class="skill-list">
-                            <div class="skill-item">
-                                <div class="skill-info">
-                                    <span>Adobe Photoshop</span>
-                                    <span>88%</span>
-                                </div>
-                                <div class="skill-progress-bar">
-                                    <div class="skill-progress" data-level="88%"></div>
-                                </div>
-                            </div>
-                            <div class="skill-item">
-                                <div class="skill-info">
-                                    <span>Figma (UI/UX Design)</span>
-                                    <span>80%</span>
-                                </div>
-                                <div class="skill-progress-bar">
-                                    <div class="skill-progress" data-level="80%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Audio & Broadcasting Skills -->
-                    <div class="skill-category-card">
-                        <div class="skill-category-header">
-                            <i class="fa-solid fa-volume-high skill-cat-icon"></i>
-                            <h3>Audio & Penyiaran</h3>
-                        </div>
-                        <div class="skill-list">
-                            <div class="skill-item">
-                                <div class="skill-info">
-                                    <span>Studio One</span>
-                                    <span>85%</span>
-                                </div>
-                                <div class="skill-progress-bar">
-                                    <div class="skill-progress" data-level="85%"></div>
-                                </div>
-                            </div>
-                            <div class="skill-item">
-                                <div class="skill-info">
-                                    <span>OBS Studio</span>
-                                    <span>90%</span>
-                                </div>
-                                <div class="skill-progress-bar">
-                                    <div class="skill-progress" data-level="90%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="skills-grid" id="skills-grid">
+                    <!-- Di-render secara dinamis lewat JS -->
                 </div>
             </div>
         </section>
@@ -345,25 +189,25 @@
                         <p class="contact-panel-desc">Ada proyek besar yang ingin Anda bangun, atau butuh bantuan dalam desain & pengembangan? Jangan ragu untuk menghubungi saya!</p>
                         
                         <div class="contact-details">
-                            <a href="mailto:ibrahimlanceng@gmail.com" class="contact-detail-card">
+                            <a href="mailto:ibrahimlanceng@gmail.com" class="contact-detail-card" id="contact-email-link">
                                 <div class="card-icon"><i class="fa-solid fa-envelope"></i></div>
                                 <div class="card-info">
                                     <h4>Email</h4>
-                                    <span>ibrahimlanceng@gmail.com</span>
+                                    <span id="contact-email">ibrahimlanceng@gmail.com</span>
                                 </div>
                             </a>
-                            <a href="https://wa.me/628123456789" target="_blank" rel="noopener" class="contact-detail-card">
+                            <a href="https://wa.me/628123456789" target="_blank" rel="noopener" class="contact-detail-card" id="contact-wa-link">
                                 <div class="card-icon"><i class="fa-brands fa-whatsapp"></i></div>
                                 <div class="card-info">
                                     <h4>WhatsApp</h4>
-                                    <span>+62 812-3456-789</span>
+                                    <span id="contact-wa">+62 812-3456-789</span>
                                 </div>
                             </a>
                             <div class="contact-detail-card">
                                 <div class="card-icon"><i class="fa-solid fa-location-dot"></i></div>
                                 <div class="card-info">
                                     <h4>Lokasi</h4>
-                                    <span>Jakarta, Indonesia</span>
+                                    <span id="contact-location">Jakarta, Indonesia</span>
                                 </div>
                             </div>
                         </div>
@@ -437,6 +281,8 @@
             <div class="footer-brand">
                 <a href="#" class="footer-logo">Porto<span>folio.</span></a>
                 <p>Membangun web elegan, simpel, dan interaktif dengan sentuhan kreativitas tingkat tinggi.</p>
+                <!-- discreet admin area link -->
+                <a href="admin.html" style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.4; display: block; margin-top: 8px;"><i class="fa-solid fa-lock"></i> Area Admin</a>
             </div>
             <div class="footer-nav">
                 <h4>Navigasi</h4>
@@ -486,6 +332,7 @@
     </div>
 
     <!-- JavaScript script -->
+    <script src="data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
