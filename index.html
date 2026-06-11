@@ -153,6 +153,13 @@
                 <div class="portfolio-grid" id="portfolio-grid">
                     <!-- Di-render secara dinamis lewat JS -->
                 </div>
+                
+                <!-- Load More Button -->
+                <div id="load-more-container" style="display: none; justify-content: center; margin-top: 48px;">
+                    <button class="btn btn-secondary" id="load-more-btn" onclick="loadMoreProjects()" style="gap: 8px;">
+                        Lihat Selengkapnya <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -208,14 +215,6 @@
                             </div>
                         </div>
                         
-                        <div class="social-links-wrapper">
-                            <h4>Ikuti Saya:</h4>
-                            <div class="social-links">
-                                <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-                                <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
-                                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- Contact Form Panel -->
@@ -275,8 +274,8 @@
     <footer class="footer">
         <div class="container footer-container">
             <div class="footer-brand">
-                <a href="#" class="footer-logo">Porto<span>folio.</span></a>
-                <p>Membangun web elegan, simpel, dan interaktif dengan sentuhan kreativitas tingkat tinggi.</p>
+                <a href="#" class="footer-logo">Ibrahim.</a>
+                <p>Dari visi kreatif menjadi visual yang mampu bercerita.</p>
                 <!-- discreet admin area link -->
                 <a href="admin.html" style="font-size: 0.75rem; color: var(--text-muted); opacity: 0.4; display: block; margin-top: 8px;"><i class="fa-solid fa-lock"></i> Area Admin</a>
             </div>
@@ -292,7 +291,7 @@
             </div>
             <div class="footer-social">
                 <h4>Temukan Saya</h4>
-                <div class="footer-icons">
+                <div class="footer-icons" id="footer-social-icons">
                     <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
                     <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
                     <a href="https://wa.me/628123456789" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>

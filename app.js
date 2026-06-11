@@ -256,13 +256,24 @@ function getYouTubeThumbnail(url) {
     return null;
 }
 
+let activeFilter = 'all';
+let displayLimit = 6;
+
 function renderProjects() {
     const portfolioGrid = document.getElementById('portfolio-grid');
     if (!portfolioGrid) return;
 
     portfolioGrid.innerHTML = '';
 
-    window.portfolioData.projects.forEach(project => {
+    // Filter projects based on activeFilter
+    const filtered = window.portfolioData.projects.filter(project => {
+        return activeFilter === 'all' || project.category === activeFilter;
+    });
+
+    // Slice to displayLimit
+    const visible = filtered.slice(0, displayLimit);
+
+    visible.forEach(project => {
         let mediaHTML = '';
         const isVideoCategory = project.category === 'video';
         const hasEmbed = project.isVideo && project.videoEmbedUrl && project.videoEmbedUrl.trim() !== '';
@@ -344,7 +355,7 @@ function renderProjects() {
         }
 
         const cardHTML = `
-            <div class="portfolio-card" data-category="${project.category}">
+            <div class="portfolio-card" data-category="${project.category}" style="opacity: 0; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;">
                 <div class="card-img-wrapper">
                     ${mediaHTML}
                     <div class="card-overlay">
@@ -366,6 +377,48 @@ function renderProjects() {
         `;
         portfolioGrid.insertAdjacentHTML('beforeend', cardHTML);
     });
+
+    // Trigger scale up animation
+    setTimeout(() => {
+        const cards = portfolioGrid.querySelectorAll('.portfolio-card');
+        cards.forEach(card => {
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+        });
+    }, 50);
+
+    // Toggle the display of "Lihat Selengkapnya" button
+    const loadMoreContainer = document.getElementById('load-more-container');
+    if (loadMoreContainer) {
+        if (filtered.length > displayLimit) {
+            loadMoreContainer.style.display = 'flex';
+        } else {
+            loadMoreContainer.style.display = 'none';
+        }
+    }
+}
+
+function renderSocials() {
+    const footerIcons = document.getElementById('footer-social-icons');
+    if (!footerIcons) return;
+
+    footerIcons.innerHTML = '';
+
+    const socials = window.portfolioData.socials || [];
+    socials.forEach(social => {
+        if (!social.url || social.url.trim() === '') return;
+        const link = document.createElement('a');
+        link.href = social.url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.setAttribute('aria-label', social.platform);
+        
+        const icon = document.createElement('i');
+        icon.className = social.icon || 'fa-solid fa-link';
+        
+        link.appendChild(icon);
+        footerIcons.appendChild(link);
+    });
 }
 
 /* ==========================================================================
@@ -378,30 +431,19 @@ function initFilters() {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            const filterValue = btn.getAttribute('data-filter');
-            const portfolioCards = document.querySelectorAll('.portfolio-card');
-
-            portfolioCards.forEach(card => {
-                const category = card.getAttribute('data-category');
-
-                card.style.transform = 'scale(0.8)';
-                card.style.opacity = '0';
-
-                setTimeout(() => {
-                    if (filterValue === 'all' || category === filterValue) {
-                        card.style.display = 'flex';
-                        setTimeout(() => {
-                            card.style.transform = 'scale(1)';
-                            card.style.opacity = '1';
-                        }, 50);
-                    } else {
-                        card.style.display = 'none';
-                    }
-                }, 300);
-            });
+            activeFilter = btn.getAttribute('data-filter');
+            displayLimit = 6; // Reset display limit on filter switch
+            renderProjects();
         });
     });
 }
+
+function loadMoreProjects() {
+    displayLimit += 6; // Load 6 more items
+    renderProjects();
+}
+
+window.loadMoreProjects = loadMoreProjects;
 
 /* ==========================================================================
    PROJECT MODAL (LIGHTBOX)
@@ -731,6 +773,7 @@ async function loadFirebaseData(config) {
                 renderBiodata();
                 renderSkills();
                 renderProjects();
+                renderSocials();
                 
                 // Inisialisasi ulang progress bar observer untuk elemen baru
                 if (skillObserver && skillSection) {
@@ -761,10 +804,38 @@ document.addEventListener('DOMContentLoaded', () => {
         window.portfolioData = defaultPortfolioData;
     }
 
+    // Convert old object socials to new array socials if needed
+    if (window.portfolioData && window.portfolioData.biodata && window.portfolioData.biodata.socials) {
+        if (!Array.isArray(window.portfolioData.socials)) {
+            window.portfolioData.socials = [];
+            const oldSocials = window.portfolioData.biodata.socials;
+            const icons = {
+                github: "fa-brands fa-github",
+                linkedin: "fa-brands fa-linkedin",
+                instagram: "fa-brands fa-instagram"
+            };
+            for (const [platform, url] of Object.entries(oldSocials)) {
+                window.portfolioData.socials.push({
+                    platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+                    url: url,
+                    icon: icons[platform.toLowerCase()] || "fa-solid fa-link"
+                });
+            }
+        }
+    }
+    if (!window.portfolioData.socials) {
+        window.portfolioData.socials = [
+            { platform: "GitHub", url: "https://github.com", icon: "fa-brands fa-github" },
+            { platform: "LinkedIn", url: "https://linkedin.com", icon: "fa-brands fa-linkedin" },
+            { platform: "Instagram", url: "https://instagram.com", icon: "fa-brands fa-instagram" }
+        ];
+    }
+
     // Render dynamic components
     renderBiodata();
     renderSkills();
     renderProjects();
+    renderSocials();
 
     // Initialize interaction systems
     initTheme();

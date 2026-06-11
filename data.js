@@ -9,17 +9,17 @@ const defaultPortfolioData = {
         location: "Jakarta, Indonesia",
         education: "S1 Teknik Informatika",
         about: "Saya adalah seorang Editor Video, Desainer Grafis, dan Produser Media Kreatif yang berdedikasi untuk menciptakan konten digital berkualitas tinggi. Berbekal keahlian di berbagai perangkat lunak produksi standar industri, saya siap merealisasikan visi kreatif Anda menjadi karya yang memukau.",
-        socials: {
-            github: "https://github.com",
-            linkedin: "https://linkedin.com",
-            instagram: "https://instagram.com"
-        },
         stats: {
             experience: "3+",
             completedProjects: "15+",
             satisfiedClients: "99%"
         }
     },
+    socials: [
+        { platform: "GitHub", url: "https://github.com", icon: "fa-brands fa-github" },
+        { platform: "LinkedIn", url: "https://linkedin.com", icon: "fa-brands fa-linkedin" },
+        { platform: "Instagram", url: "https://instagram.com", icon: "fa-brands fa-instagram" }
+    ],
     skills: [
         { category: "Produksi Video", name: "Adobe Premiere Pro", level: "92%" },
         { category: "Produksi Video", name: "Adobe After Effects", level: "85%" },

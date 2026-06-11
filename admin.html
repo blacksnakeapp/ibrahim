@@ -427,6 +427,10 @@
             cursor: pointer;
         }
 
+        .social-row {
+            grid-template-columns: 1.2fr 1.2fr 2fr auto !important;
+        }
+
         /* Floating Actions Panel */
         .actions-panel {
             position: fixed;
@@ -454,9 +458,14 @@
         /* Toast notifications */
         .toast-container {
             position: fixed;
-            bottom: 90px;
-            right: 30px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 3000;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .toast {
@@ -466,30 +475,61 @@
             background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-left: 5px solid #22c55e;
-            padding: 16px 20px;
+            padding: 20px 24px;
             border-radius: var(--radius-md);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: translateY(150%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+            transform: translate(-50%, -50%) scale(0.7); /* Scale-in from translate center offset */
+            opacity: 0;
+            pointer-events: auto;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            max-width: 450px;
+            width: 90vw;
+            position: fixed; /* Fixed relative to viewport center */
+            top: 50%;
+            left: 50%;
         }
 
         .toast.active {
-            transform: translateY(0);
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
         }
 
         .toast-icon {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #22c55e;
+            display: flex;
+            align-items: center;
         }
 
         .toast-title {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            margin-bottom: 2px;
         }
 
         .toast-message {
             font-size: 0.85rem;
             color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .toast-close-btn {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            background: none;
+            border: none;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.2s;
+            margin-left: auto;
+        }
+
+        .toast-close-btn:hover {
+            color: #ef4444 !important;
+            transform: scale(1.1);
         }
 
         /* Responsive */
@@ -676,6 +716,10 @@
                     <i class="fa-solid fa-film"></i>
                     <span>Karya Portofolio</span>
                 </button>
+                <button class="tab-btn" onclick="switchTab('socials')">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>Sosial Media</span>
+                </button>
             </div>
 
             <!-- Main Editor Content Area -->
@@ -800,6 +844,22 @@
                         <i class="fa-solid fa-plus"></i> Tambah Karya Baru
                     </button>
                 </div>
+
+                <!-- Tab: Socials -->
+                <div id="tab-socials" class="tab-content">
+                    <div class="tab-header">
+                        <h2 class="tab-title">Tautan Sosial Media</h2>
+                        <p class="tab-desc">Kelola akun dan tautan sosial media Anda yang akan tampil di bagian bawah website.</p>
+                    </div>
+
+                    <div class="list-container" id="socials-list-wrapper">
+                        <!-- Dynamic Socials Rows Injected Here -->
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="addNewSocial()">
+                        <i class="fa-solid fa-plus"></i> Tambah Sosial Media Baru
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -819,10 +879,11 @@
     <div class="toast-container">
         <div class="toast" id="success-toast">
             <div class="toast-icon"><i class="fa-solid fa-circle-check"></i></div>
-            <div>
+            <div style="flex-grow: 1; padding-right: 12px;">
                 <h4 class="toast-title">Perubahan Disimpan!</h4>
                 <p class="toast-message">Data portofolio Anda berhasil diperbarui di memori browser.</p>
             </div>
+            <button class="toast-close-btn" onclick="document.getElementById('success-toast').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
         </div>
     </div>
 
@@ -1019,10 +1080,39 @@
             } else {
                 activeData = JSON.parse(JSON.stringify(defaultPortfolioData));
             }
+
+            // Convert old socials object to new socials array if needed
+            if (activeData.biodata && activeData.biodata.socials) {
+                if (!Array.isArray(activeData.socials)) {
+                    activeData.socials = [];
+                    const oldSocials = activeData.biodata.socials;
+                    const icons = {
+                        github: "fa-brands fa-github",
+                        linkedin: "fa-brands fa-linkedin",
+                        instagram: "fa-brands fa-instagram"
+                    };
+                    for (const [platform, url] of Object.entries(oldSocials)) {
+                        activeData.socials.push({
+                            platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+                            url: url,
+                            icon: icons[platform.toLowerCase()] || "fa-solid fa-link"
+                        });
+                    }
+                    delete activeData.biodata.socials;
+                }
+            }
+            if (!activeData.socials) {
+                activeData.socials = [
+                    { platform: "GitHub", url: "https://github.com", icon: "fa-brands fa-github" },
+                    { platform: "LinkedIn", url: "https://linkedin.com", icon: "fa-brands fa-linkedin" },
+                    { platform: "Instagram", url: "https://instagram.com", icon: "fa-brands fa-instagram" }
+                ];
+            }
             
             populateBiodataForm();
             renderSkillsForm();
             renderProjectsForm();
+            renderSocialsForm();
 
             // Ambil data dari Firestore jika Firebase terkonfigurasi dan user sudah login
             if (isFirebaseConfigured && db && auth && auth.currentUser) {
@@ -1031,11 +1121,41 @@
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         activeData = docSnap.data();
+
+                        // Convert old socials object to new socials array if needed (cloud data fallback)
+                        if (activeData.biodata && activeData.biodata.socials) {
+                            if (!Array.isArray(activeData.socials)) {
+                                activeData.socials = [];
+                                const oldSocials = activeData.biodata.socials;
+                                const icons = {
+                                    github: "fa-brands fa-github",
+                                    linkedin: "fa-brands fa-linkedin",
+                                    instagram: "fa-brands fa-instagram"
+                                };
+                                for (const [platform, url] of Object.entries(oldSocials)) {
+                                    activeData.socials.push({
+                                        platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+                                        url: url,
+                                        icon: icons[platform.toLowerCase()] || "fa-solid fa-link"
+                                    });
+                                }
+                                delete activeData.biodata.socials;
+                            }
+                        }
+                        if (!activeData.socials) {
+                            activeData.socials = [
+                                { platform: "GitHub", url: "https://github.com", icon: "fa-brands fa-github" },
+                                { platform: "LinkedIn", url: "https://linkedin.com", icon: "fa-brands fa-linkedin" },
+                                { platform: "Instagram", url: "https://instagram.com", icon: "fa-brands fa-instagram" }
+                            ];
+                        }
+
                         localStorage.setItem('portfolioData', JSON.stringify(activeData));
                         
                         populateBiodataForm();
                         renderSkillsForm();
                         renderProjectsForm();
+                        renderSocialsForm();
                         showSuccessToast("Data berhasil disinkronkan dari Cloud Firestore!");
                     }
                 } catch (error) {
@@ -1220,6 +1340,99 @@
             renderProjectsForm();
         }
 
+        function renderSocialsForm() {
+            const container = document.getElementById('socials-list-wrapper');
+            container.innerHTML = '';
+
+            const platformIcons = {
+                'github': 'fa-brands fa-github',
+                'linkedin': 'fa-brands fa-linkedin',
+                'instagram': 'fa-brands fa-instagram',
+                'whatsapp': 'fa-brands fa-whatsapp',
+                'youtube': 'fa-brands fa-youtube',
+                'tiktok': 'fa-brands fa-tiktok',
+                'facebook': 'fa-brands fa-facebook',
+                'twitter': 'fa-brands fa-x-twitter',
+                'email': 'fa-solid fa-envelope',
+                'website': 'fa-solid fa-globe',
+                'lainnya': 'fa-solid fa-link'
+            };
+
+            activeData.socials.forEach((social, index) => {
+                const isCustom = !platformIcons[social.platform.toLowerCase()];
+                const platformVal = isCustom ? 'Lainnya' : social.platform;
+                
+                const row = document.createElement('div');
+                row.className = 'list-row social-row';
+                row.innerHTML = `
+                    <select class="social-platform-select" data-index="${index}" onchange="updateSocialIconPreview(this, ${index})">
+                        <option value="GitHub" ${platformVal === 'GitHub' ? 'selected' : ''}>GitHub</option>
+                        <option value="LinkedIn" ${platformVal === 'LinkedIn' ? 'selected' : ''}>LinkedIn</option>
+                        <option value="Instagram" ${platformVal === 'Instagram' ? 'selected' : ''}>Instagram</option>
+                        <option value="WhatsApp" ${platformVal === 'WhatsApp' ? 'selected' : ''}>WhatsApp</option>
+                        <option value="YouTube" ${platformVal === 'YouTube' ? 'selected' : ''}>YouTube</option>
+                        <option value="TikTok" ${platformVal === 'TikTok' ? 'selected' : ''}>TikTok</option>
+                        <option value="Facebook" ${platformVal === 'Facebook' ? 'selected' : ''}>Facebook</option>
+                        <option value="Twitter" ${platformVal === 'Twitter' ? 'selected' : ''}>Twitter/X</option>
+                        <option value="Email" ${platformVal === 'Email' ? 'selected' : ''}>Email</option>
+                        <option value="Lainnya" ${platformVal === 'Lainnya' ? 'selected' : ''}>Lainnya (Custom)</option>
+                    </select>
+                    <div style="display: flex; gap: 8px; align-items: center; justify-self: stretch;">
+                        <i class="${social.icon || 'fa-solid fa-link'}" id="social-preview-icon-${index}" style="font-size: 1.25rem; width: 24px; text-align: center; color: var(--accent-color);"></i>
+                        <input type="text" value="${social.icon || ''}" placeholder="fa-solid fa-link" class="social-icon-input" id="social-icon-input-${index}" data-index="${index}" style="display: ${platformVal === 'Lainnya' ? 'block' : 'none'}; width: 100%;" oninput="document.getElementById('social-preview-icon-${index}').className = this.value">
+                    </div>
+                    <input type="text" value="${social.url}" placeholder="Tautan lengkap (https://...)" class="social-url-input" data-index="${index}">
+                    <button class="btn-icon" onclick="deleteSocial(${index})" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateSocialIconPreview(selectEl, index) {
+            const val = selectEl.value;
+            const previewIcon = document.getElementById(`social-preview-icon-${index}`);
+            const iconInput = document.getElementById(`social-icon-input-${index}`);
+            
+            const platformIcons = {
+                'github': 'fa-brands fa-github',
+                'linkedin': 'fa-brands fa-linkedin',
+                'instagram': 'fa-brands fa-instagram',
+                'whatsapp': 'fa-brands fa-whatsapp',
+                'youtube': 'fa-brands fa-youtube',
+                'tiktok': 'fa-brands fa-tiktok',
+                'facebook': 'fa-brands fa-facebook',
+                'twitter': 'fa-brands fa-x-twitter',
+                'email': 'fa-solid fa-envelope',
+                'website': 'fa-solid fa-globe',
+                'lainnya': 'fa-solid fa-link'
+            };
+
+            if (val === 'Lainnya') {
+                iconInput.style.display = 'block';
+                iconInput.value = platformIcons['lainnya'];
+                previewIcon.className = platformIcons['lainnya'];
+            } else {
+                iconInput.style.display = 'none';
+                const iconClass = platformIcons[val.toLowerCase()] || 'fa-solid fa-link';
+                iconInput.value = iconClass;
+                previewIcon.className = iconClass;
+            }
+        }
+
+        function addNewSocial() {
+            activeData.socials.push({
+                platform: "GitHub",
+                url: "https://",
+                icon: "fa-brands fa-github"
+            });
+            renderSocialsForm();
+        }
+
+        function deleteSocial(index) {
+            activeData.socials.splice(index, 1);
+            renderSocialsForm();
+        }
+
         // ==========================================================================
         // DATA SAVING AND EXPORTING
         // ==========================================================================
@@ -1298,6 +1511,43 @@
                 }
             });
 
+            const socialPlatforms = document.querySelectorAll('.social-platform-select');
+            const socialIcons = document.querySelectorAll('.social-icon-input');
+            const socialUrls = document.querySelectorAll('.social-url-input');
+
+            activeData.socials = [];
+            socialPlatforms.forEach((select, index) => {
+                const platform = select.value;
+                let icon = '';
+                if (platform === 'Lainnya') {
+                    icon = socialIcons[index].value || 'fa-solid fa-link';
+                } else {
+                    const platformIcons = {
+                        'github': 'fa-brands fa-github',
+                        'linkedin': 'fa-brands fa-linkedin',
+                        'instagram': 'fa-brands fa-instagram',
+                        'whatsapp': 'fa-brands fa-whatsapp',
+                        'youtube': 'fa-brands fa-youtube',
+                        'tiktok': 'fa-brands fa-tiktok',
+                        'facebook': 'fa-brands fa-facebook',
+                        'twitter': 'fa-brands fa-x-twitter',
+                        'email': 'fa-solid fa-envelope',
+                        'website': 'fa-solid fa-globe',
+                        'lainnya': 'fa-solid fa-link'
+                    };
+                    icon = platformIcons[platform.toLowerCase()] || 'fa-solid fa-link';
+                }
+                const url = socialUrls[index].value;
+
+                if (url.trim() !== '') {
+                    activeData.socials.push({
+                        platform,
+                        url,
+                        icon
+                    });
+                }
+            });
+
             localStorage.setItem('portfolioData', JSON.stringify(activeData));
 
             if (isFirebaseConfigured && db && auth && auth.currentUser) {
@@ -1341,6 +1591,7 @@ const defaultPortfolioData = ${JSON.stringify(activeData, null, 4)};
             URL.revokeObjectURL(url);
         }
 
+        let toastTimeout;
         function showSuccessToast(customMessage = null) {
             const toast = document.getElementById('success-toast');
             if (customMessage) {
@@ -1349,9 +1600,10 @@ const defaultPortfolioData = ${JSON.stringify(activeData, null, 4)};
                 toast.querySelector('.toast-message').textContent = "Data portofolio Anda berhasil diperbarui di memori browser.";
             }
             toast.classList.add('active');
-            setTimeout(() => {
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
                 toast.classList.remove('active');
-            }, 3000);
+            }, 4000);
         }
 
         // Attach functions to window scope for HTML inline calls
@@ -1365,6 +1617,10 @@ const defaultPortfolioData = ${JSON.stringify(activeData, null, 4)};
         window.downloadConfigData = downloadConfigData;
         window.toggleVideoInput = toggleVideoInput;
         window.updateSkillPercent = updateSkillPercent;
+        window.renderSocialsForm = renderSocialsForm;
+        window.updateSocialIconPreview = updateSocialIconPreview;
+        window.addNewSocial = addNewSocial;
+        window.deleteSocial = deleteSocial;
 
         // ==========================================================================
         // CLOUDINARY UPLOAD
