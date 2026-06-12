@@ -149,7 +149,24 @@ function renderBiodata() {
     const bioEducation = document.getElementById('bio-education');
 
     if (aboutGreeting) aboutGreeting.innerHTML = `Halo, nama saya <span>${bio.name}</span>`;
-    if (aboutText) aboutText.textContent = bio.about;
+    if (aboutText) {
+        const maxLength = 180;
+        if (bio.about && bio.about.length > maxLength) {
+            let truncated = bio.about.substring(0, maxLength);
+            const lastSpace = truncated.lastIndexOf(' ');
+            if (lastSpace > 0) {
+                truncated = truncated.substring(0, lastSpace);
+            }
+            aboutText.innerHTML = `
+                ${truncated}... 
+                <button onclick="openAboutModal()" style="background: none; border: none; color: var(--primary-color); font-weight: 700; cursor: pointer; padding: 0; margin-left: 6px; font-family: inherit; font-size: inherit; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-color)'" onmouseout="this.style.color='var(--primary-color)'">
+                    Baca Selengkapnya <i class="fa-solid fa-angles-right" style="font-size: 0.85em;"></i>
+                </button>
+            `;
+        } else {
+            aboutText.textContent = bio.about || '';
+        }
+    }
     if (bioName) bioName.textContent = bio.name;
     if (bioRole) bioRole.textContent = bio.role;
     if (bioLocation) bioLocation.textContent = bio.location;
@@ -265,6 +282,8 @@ function getVideoPlatformInfo(url) {
         return { name: 'TikTok', icon: 'fa-brands fa-tiktok' };
     } else if (lowercaseUrl.includes('instagram.com')) {
         return { name: 'Instagram', icon: 'fa-brands fa-instagram' };
+    } else if (lowercaseUrl.includes('drive.google.com')) {
+        return { name: 'Google Drive', icon: 'fa-brands fa-google-drive' };
     }
     return { name: 'Video', icon: 'fa-solid fa-circle-play' };
 }
@@ -515,6 +534,25 @@ function convertToEmbedUrl(url) {
         }
     }
 
+    // 4. Google Drive
+    if (url.includes('drive.google.com')) {
+        let fileId = '';
+        if (url.includes('/file/d/')) {
+            const parts = url.split('/file/d/');
+            if (parts[1]) fileId = parts[1].split('/')[0].split(/[?#]/)[0];
+        } else if (url.includes('?id=')) {
+            const urlParams = new URLSearchParams(url.split('?')[1] || '');
+            fileId = urlParams.get('id') || '';
+        } else if (url.includes('&id=')) {
+            const urlParams = new URLSearchParams(url.split('?')[1] || '');
+            fileId = urlParams.get('id') || '';
+        }
+        
+        if (fileId) {
+            return `https://drive.google.com/file/d/${fileId}/preview`;
+        }
+    }
+
     return url;
 }
 
@@ -664,6 +702,32 @@ function closeProjectModal() {
     modalProjectBody.innerHTML = '';
 }
 
+function openAboutModal() {
+    const bio = window.portfolioData.biodata;
+    const modalProjectBody = document.getElementById('modal-project-body');
+    const projectModal = document.getElementById('project-modal');
+    
+    const content = `
+        <div class="modal-about-content" style="padding: 20px 0;">
+            <div style="font-size: 3rem; color: var(--primary-color); margin-bottom: 16px; text-align: center;">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <h3 class="modal-detail-title" style="text-align: center; margin-bottom: 20px;">Profil & Biodata Lengkap</h3>
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; max-height: 400px; overflow-y: auto; line-height: 1.8; color: var(--text-primary);">
+                <p style="white-space: pre-line; font-size: 1.05rem;">${bio.about}</p>
+            </div>
+            <div style="display: flex; justify-content: center;">
+                <button class="btn btn-secondary" onclick="closeProjectModal()"><i class="fa-solid fa-xmark"></i> Tutup</button>
+            </div>
+        </div>
+    `;
+    
+    modalProjectBody.innerHTML = content;
+    projectModal.classList.add('active');
+    projectModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+}
+
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && projectModal.classList.contains('active')) {
         closeProjectModal();
@@ -673,6 +737,7 @@ document.addEventListener('keydown', (e) => {
 // Bind to window for global inline onclick support
 window.openProjectModal = openProjectModal;
 window.closeProjectModal = closeProjectModal;
+window.openAboutModal = openAboutModal;
 
 /* ==========================================================================
    SKILL PROGRESS ANIMATION ON SCROLL
