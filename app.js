@@ -707,12 +707,27 @@ function openAboutModal() {
     const modalProjectBody = document.getElementById('modal-project-body');
     const projectModal = document.getElementById('project-modal');
     
-    const content = `
-        <div class="modal-about-content" style="padding: 20px 0;">
+    const avatarHTML = bio.avatar ? `
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
+            <div style="width: 110px; height: 110px; border-radius: var(--radius-full); padding: 4px; background: var(--gradient-primary); box-shadow: 0 0 25px var(--primary-glow); margin-bottom: 16px;">
+                <img src="${bio.avatar}" alt="${bio.name}" style="width: 100%; height: 100%; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--bg-secondary);">
+            </div>
+            <h3 class="modal-detail-title" style="text-align: center; margin-bottom: 4px; font-size: 1.8rem;">${bio.name}</h3>
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1.5px; text-align: center;">${bio.role}</span>
+        </div>
+    ` : `
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 24px;">
             <div style="font-size: 3rem; color: var(--primary-color); margin-bottom: 16px; text-align: center;">
                 <i class="fa-solid fa-user-tie"></i>
             </div>
-            <h3 class="modal-detail-title" style="text-align: center; margin-bottom: 20px;">Profil & Biodata Lengkap</h3>
+            <h3 class="modal-detail-title" style="text-align: center; margin-bottom: 4px; font-size: 1.8rem;">${bio.name}</h3>
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1.5px; text-align: center;">${bio.role}</span>
+        </div>
+    `;
+    
+    const content = `
+        <div class="modal-about-content" style="padding: 20px 0;">
+            ${avatarHTML}
             <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; max-height: 400px; overflow-y: auto; line-height: 1.8; color: var(--text-primary);">
                 <p style="white-space: pre-line; font-size: 1.05rem;">${bio.about}</p>
             </div>
