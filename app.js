@@ -256,6 +256,20 @@ function getYouTubeThumbnail(url) {
     return null;
 }
 
+function getVideoPlatformInfo(url) {
+    if (!url) return { name: 'Video', icon: 'fa-solid fa-circle-play' };
+    const lowercaseUrl = url.toLowerCase();
+    if (lowercaseUrl.includes('youtube.com') || lowercaseUrl.includes('youtu.be')) {
+        return { name: 'YouTube', icon: 'fa-brands fa-youtube' };
+    } else if (lowercaseUrl.includes('tiktok.com')) {
+        return { name: 'TikTok', icon: 'fa-brands fa-tiktok' };
+    } else if (lowercaseUrl.includes('instagram.com')) {
+        return { name: 'Instagram', icon: 'fa-brands fa-instagram' };
+    }
+    return { name: 'Video', icon: 'fa-solid fa-circle-play' };
+}
+
+
 let activeFilter = 'all';
 let displayLimit = 6;
 
@@ -312,6 +326,9 @@ function renderProjects() {
         let detailBtnAction = '';
 
         if (isVideoCategory) {
+            const videoUrl = project.demoUrl || project.videoEmbedUrl || '';
+            const platform = getVideoPlatformInfo(videoUrl);
+
             if (isProtected) {
                 linkBtnHTML = `
                     <a href="#" onclick="openProjectModal('${project.id}'); return false;" style="width: 100%; justify-content: center;" aria-label="Kunci"><i class="fa-solid fa-lock"></i> Kunci Putar (Sandi)</a>
@@ -321,7 +338,7 @@ function renderProjects() {
                 detailBtnAction = `openProjectModal('${project.id}')`;
             } else if (hasEmbed) {
                 linkBtnHTML = `
-                    <a href="${project.demoUrl || '#'}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa-brands fa-youtube"></i> YouTube</a>
+                    <a href="${project.demoUrl || '#'}" target="_blank" rel="noopener" aria-label="${platform.name}"><i class="${platform.icon}"></i> ${platform.name}</a>
                     <a href="#" onclick="openProjectModal('${project.id}'); return false;" aria-label="Putar"><i class="fa-solid fa-circle-play"></i> Putar</a>
                 `;
                 detailBtnLabel = 'Putar Video';
@@ -329,10 +346,10 @@ function renderProjects() {
                 detailBtnAction = `openProjectModal('${project.id}')`;
             } else {
                 linkBtnHTML = `
-                    <a href="${project.demoUrl || '#'}" target="_blank" rel="noopener" aria-label="Tonton" style="width: 100%; justify-content: center;"><i class="fa-brands fa-youtube"></i> Tonton di YouTube</a>
+                    <a href="${project.demoUrl || '#'}" target="_blank" rel="noopener" aria-label="Tonton" style="width: 100%; justify-content: center;"><i class="${platform.icon}"></i> Tonton di ${platform.name}</a>
                 `;
                 detailBtnLabel = 'Tonton Video';
-                detailBtnIcon = 'fa-brands fa-youtube';
+                detailBtnIcon = platform.icon;
                 detailBtnAction = `window.open('${project.demoUrl || '#'}', '_blank')`;
             }
         } else {
@@ -345,8 +362,7 @@ function renderProjects() {
                 detailBtnAction = `openProjectModal('${project.id}')`;
             } else {
                 linkBtnHTML = `
-                    <a href="${project.codeUrl || '#'}" target="_blank" rel="noopener" aria-label="Source"><i class="fa-brands ${project.tag === 'UI/UX Design' ? 'fa-figma' : 'fa-github'}"></i> Link</a>
-                    <a href="#" onclick="openProjectModal('${project.id}'); return false;" aria-label="Demo"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo</a>
+                    <a href="#" onclick="openProjectModal('${project.id}'); return false;" aria-label="Demo" style="width: 100%; justify-content: center;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo</a>
                 `;
                 detailBtnLabel = 'Lihat Detail';
                 detailBtnIcon = 'fa-solid fa-expand';
@@ -449,10 +465,64 @@ window.loadMoreProjects = loadMoreProjects;
    PROJECT MODAL (LIGHTBOX)
    ========================================================================== */
 
+function convertToEmbedUrl(url) {
+    if (!url) return '';
+    url = url.trim();
+
+    // 1. YouTube (Watch link, Shorts link, Shortened link)
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtube.com/shorts/')) {
+            const parts = url.split('/shorts/');
+            if (parts[1]) videoId = parts[1].split(/[?#]/)[0];
+        } else if (url.includes('youtube.com/watch')) {
+            const urlParams = new URLSearchParams(url.split('?')[1] || '');
+            videoId = urlParams.get('v') || '';
+        } else if (url.includes('youtu.be/')) {
+            const parts = url.split('youtu.be/');
+            if (parts[1]) videoId = parts[1].split(/[?#]/)[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            return url; // already in embed format
+        }
+        
+        if (videoId) {
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+    }
+
+    // 2. Instagram (Posts, Reels, TV)
+    if (url.includes('instagram.com')) {
+        if (url.includes('/p/') || url.includes('/reel/') || url.includes('/tv/')) {
+            let cleanUrl = url.split('?')[0];
+            if (!cleanUrl.endsWith('/')) {
+                cleanUrl += '/';
+            }
+            if (!cleanUrl.endsWith('embed/')) {
+                cleanUrl += 'embed/';
+            }
+            return cleanUrl;
+        }
+    }
+
+    // 3. TikTok (Standard video links)
+    if (url.includes('tiktok.com')) {
+        if (url.includes('/video/')) {
+            const parts = url.split('/video/');
+            if (parts[1]) {
+                const videoId = parts[1].split(/[?#]/)[0];
+                return `https://www.tiktok.com/embed/${videoId}`;
+            }
+        }
+    }
+
+    return url;
+}
+
 function renderActualModalContent(data) {
     let mediaHTML = '';
     if (data.isVideo) {
-        const url = data.videoEmbedUrl || '';
+        const rawUrl = data.videoEmbedUrl || '';
+        const url = convertToEmbedUrl(rawUrl);
         const isDirectVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.ogg') || url.includes('/video/upload/');
 
         if (isDirectVideo) {
@@ -477,6 +547,38 @@ function renderActualModalContent(data) {
 
     const techsHTML = data.techs.map(tech => `<span>${tech}</span>`).join('');
 
+    let linksHTML = '';
+    if (data.category === 'video') {
+        if (data.demoUrl && data.demoUrl.trim() !== '' && data.demoUrl !== '#') {
+            const platform = getVideoPlatformInfo(data.demoUrl);
+            const label = platform.name === 'Video' ? 'Tonton Video' : `Tonton di ${platform.name}`;
+            linksHTML = `
+                <div class="modal-detail-links">
+                    <a href="${data.demoUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="${platform.icon}"></i> ${label}</a>
+                </div>
+            `;
+        }
+    } else if (data.category === 'design') {
+        const linkUrl = data.demoUrl && data.demoUrl.trim() !== '' && data.demoUrl !== '#' ? data.demoUrl : '';
+        if (linkUrl) {
+            linksHTML = `
+                <div class="modal-detail-links">
+                    <a href="${linkUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="fa-brands fa-figma"></i> Buka Desain Figma</a>
+                </div>
+            `;
+        }
+    } else {
+        const hasDemo = data.demoUrl && data.demoUrl.trim() !== '' && data.demoUrl !== '#';
+        
+        if (hasDemo) {
+            linksHTML = `
+                <div class="modal-detail-links">
+                    <a href="${data.demoUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo Projek</a>
+                </div>
+            `;
+        }
+    }
+
     const content = `
         ${mediaHTML}
         <span class="modal-detail-tag">${data.tag}</span>
@@ -485,10 +587,7 @@ function renderActualModalContent(data) {
         <div class="modal-detail-techs">
             ${techsHTML}
         </div>
-        <div class="modal-detail-links">
-            <a href="${data.codeUrl || '#'}" target="_blank" rel="noopener" class="btn btn-secondary"><i class="fa-brands ${data.tag === 'UI/UX Design' ? 'fa-figma' : 'fa-github'}"></i> Lihat Source</a>
-            <a href="${data.demoUrl || '#'}" target="_blank" rel="noopener" class="btn btn-primary"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo Projek</a>
-        </div>
+        ${linksHTML}
     `;
 
     modalProjectBody.innerHTML = content;
