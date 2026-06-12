@@ -789,6 +789,12 @@
                         <textarea id="input-bio-about" rows="4"></textarea>
                     </div>
 
+                    <div class="form-group full-width">
+                        <label for="input-bio-cv">Link Download CV / Portofolio (URL Google Drive, Dropbox, dsb.)</label>
+                        <input type="url" id="input-bio-cv" placeholder="https://drive.google.com/file/d/..."
+                               title="Tautan langsung ke file CV atau portofolio Anda yang dapat diunduh">
+                    </div>
+
                     <div class="tab-header" style="margin-top: 40px; margin-bottom: 20px;">
                         <h3 style="font-family: var(--font-heading); font-size: 1.3rem;">Statistik Portofolio</h3>
                         <p class="tab-desc">Ubah angka counter pencapaian di halaman depan.</p>
@@ -1175,6 +1181,7 @@
             document.getElementById('input-bio-education').value = bio.education;
             document.getElementById('input-bio-avatar').value = bio.avatar || '';
             document.getElementById('input-bio-about').value = bio.about;
+            document.getElementById('input-bio-cv').value = bio.cvDownloadUrl || '';
 
             document.getElementById('input-stat-exp').value = bio.stats.experience;
             document.getElementById('input-stat-proj').value = bio.stats.completedProjects;
@@ -1446,6 +1453,7 @@
             activeData.biodata.education = document.getElementById('input-bio-education').value;
             activeData.biodata.avatar = document.getElementById('input-bio-avatar').value;
             activeData.biodata.about = document.getElementById('input-bio-about').value;
+            activeData.biodata.cvDownloadUrl = document.getElementById('input-bio-cv').value;
 
             activeData.biodata.stats.experience = document.getElementById('input-stat-exp').value;
             activeData.biodata.stats.completedProjects = document.getElementById('input-stat-proj').value;

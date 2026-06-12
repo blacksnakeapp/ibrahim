@@ -725,13 +725,21 @@ function openAboutModal() {
         </div>
     `;
     
+    const downloadBtnHTML = bio.cvDownloadUrl && bio.cvDownloadUrl.trim() !== '' ? `
+        <a href="${bio.cvDownloadUrl}" target="_blank" rel="noopener" download
+           class="btn btn-primary">
+            <i class="fa-solid fa-download"></i> Download Dokumen
+        </a>
+    ` : '';
+
     const content = `
         <div class="modal-about-content" style="padding: 20px 0;">
             ${avatarHTML}
             <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; max-height: 400px; overflow-y: auto; line-height: 1.8; color: var(--text-primary);">
                 <p style="white-space: pre-line; font-size: 1.05rem;">${bio.about}</p>
             </div>
-            <div style="display: flex; justify-content: center;">
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                ${downloadBtnHTML}
                 <button class="btn btn-secondary" onclick="closeProjectModal()"><i class="fa-solid fa-xmark"></i> Tutup</button>
             </div>
         </div>
